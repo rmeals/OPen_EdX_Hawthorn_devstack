@@ -1,0 +1,38 @@
+########################################
+# Standing up a new Open EdX Devstack  #
+#         CentOS environment           #
+########################################
+
+yum install nano git -y
+yum update -y
+curl -fsSL https://get.docker.com/ | sh
+systemctl enable docker
+systemctl start docker
+yum update -y
+adduser *newuser*
+passwd *newuser*
+usermod -aG wheel *newuser*
+
+#########################################
+# Open New Terminal Window and login as #
+#           the new user above          #
+#########################################
+
+sudo git clone https://github.com/edx/devstack
+cd devstack/
+sudo git checkout open-release/hawthorn.master
+export OPENEDX_RELEASE=hawthorn.master
+sudo make dev.checkout
+sudo make dev.clone
+sudo usermod -a -G docker $USER
+
+##############################
+# Back in terminal with root #
+##############################
+
+curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+cd /home/*newuser*/devstack/
+make dev.provision
+make dev.up
